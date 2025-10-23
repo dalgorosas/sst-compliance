@@ -1,0 +1,44 @@
+[project]
+name = "sst-compliance"
+version = "0.1.0"
+description = "Sistema Integral de Cumplimiento SST - DALGORO"
+requires-python = ">=3.11"
+authors = [{ name = "Darwin A. González Romero" }]
+
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.30.0",
+  "pydantic>=2.8.0",
+  "pydantic-settings>=2.3.0",
+  "sqlalchemy>=2.0.32",
+  "alembic>=1.13.2",
+  "python-multipart>=0.0.9",
+]
+
+[tool.setuptools]
+include-package-data = false
+
+# 👉 Solo empaqueta 'app' y cualquier submódulo 'app.*'
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = [
+  "tests*",
+  "scripts*",
+  "docs*",
+  "config*",
+  "data*",
+  "storage*",
+  "pdfs*",
+  ".vscode*",
+]
+
+[tool.uvicorn]
+factory = false
+reload = true
+
+[tool.black]
+line-length = 100
+
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"

@@ -1,0 +1,35 @@
+# venv
+.venv/
+env/
+venv/
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# build
+dist/
+build/
+*.egg-info/
+
+# entorno
+.env
+.env.*
+
+# base de datos local y PDFs locales
+data/
+storage/
+
+# tests cache
+.pytest_cache/
