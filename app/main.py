@@ -93,3 +93,16 @@ def viewer(doc_id: int, db: Session = Depends(get_db)):
     </html>
     """
     return HTMLResponse(content=html, status_code=200)
+
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
+
+# Servir el frontend (PDF.js)
+frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
+app.mount("/viewer", StaticFiles(directory=frontend_dir), name="frontend")
+
+@app.get("/view/{pdf_id}")
+def view_pdf(pdf_id: int):
+    index_path = os.path.join(frontend_dir, "viewer", "index.html")
+    return FileResponse(index_path)

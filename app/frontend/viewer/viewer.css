@@ -1,0 +1,59 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: #f8fafc;
+}
+
+header {
+  background: #0369a1;
+  color: white;
+  padding: 10px 20px;
+}
+
+#viewer-container {
+  display: flex;
+  flex-direction: row;
+  height: 90vh;
+}
+
+#pdf-viewer {
+  flex: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  border-right: 2px solid #e5e7eb;
+}
+
+#pdf-render {
+  width: 95%;
+  height: auto;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+#pdf-info {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f1f5f9;
+}
+
+#historial {
+  list-style-type: none;
+  padding: 0;
+}
+
+#historial li {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-left: 4px solid #0369a1;
+}
+
+footer {
+  background: #e5e7eb;
+  padding: 10px;
+  text-align: center;
+}
