@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Visor de PDF - SST Compliance</title>
+  <link rel="stylesheet" href="viewer.css" />
+  <script src="pdfjs/pdf.js"></script>
+  <script src="viewer.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>📄 SST Compliance - Visor de Documento</h1>
+  </header>
+
+  <section id="viewer-container">
+    <div id="pdf-viewer">
+      <canvas id="pdf-render"></canvas>
+    </div>
+
+    <aside id="pdf-info">
+      <h2>Historial del Documento</h2>
+      <ul id="historial"></ul>
+    </aside>
+  </section>
+
+  <footer>
+    <button id="prev-page">⬅️ Anterior</button>
+    <button id="next-page">➡️ Siguiente</button>
+    <span>Página: <span id="page-num"></span> / <span id="page-count"></span></span>
+    <button id="download-pdf">⬇️ Descargar</button>
+  </footer>
+</body>
+</html>
