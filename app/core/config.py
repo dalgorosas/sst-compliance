@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = Field(default="change-me")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60)
 
+    GOOGLE_SERVICE_ACCOUNT_FILE: str | None = Field(default=None)
+    GOOGLE_SERVICE_ACCOUNT_JSON: str | None = Field(default=None)
+    GOOGLE_SHEETS_USER_SPREADSHEET_ID: str | None = Field(default=None)
+    GOOGLE_SHEETS_USER_WORKSHEET: str | None = Field(default=None)
+    
     def ensure_dirs(self) -> None:
         """Crea los directorios necesarios para ejecutar la aplicación."""
         

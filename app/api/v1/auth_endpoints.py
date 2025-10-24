@@ -7,6 +7,10 @@ from app.core.security import create_access_token
 from app.db.session import get_db
 from app.repositories.user_repo import UserRepo
 from app.schemas.auth import LoginRequest, TokenResponse, UserCreate, UserRead, UserWithToken
+from app.services.google_sheets import GoogleSheetsRegistry
+
+
+registry = GoogleSheetsRegistry()
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -22,6 +26,11 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         password=user_in.password,
         full_name=user_in.full_name,
         role=user_in.role,
+    )
+    registry.register_user(
+        email=user.email,
+        hashed_password=user.hashed_password,
+        role=user.role.value if hasattr(user.role, "value") else str(user.role),
     )
     return user
 
