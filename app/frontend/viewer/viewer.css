@@ -52,6 +52,14 @@ header {
   border-left: 4px solid #0369a1;
 }
 
+.viewer-error {
+  padding: 24px;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
 footer {
   background: #e5e7eb;
   padding: 10px;
