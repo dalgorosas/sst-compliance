@@ -30,6 +30,8 @@ build/
 # base de datos local y PDFs locales
 data/
 storage/
+!tests/data/
+!tests/data/documents.json
 
 # tests cache
 .pytest_cache/

@@ -1,0 +1,34 @@
+[
+  {
+    "nombre": "Manual SST 2024",
+    "etiqueta": "manual",
+    "archivo": "manual-sst-2024.pdf",
+    "historial": [
+      {
+        "version": 3,
+        "origen": "auditoria",
+        "descripcion": "Actualización anual de políticas",
+        "generado_por": "sistema"
+      },
+      {
+        "version": 2,
+        "origen": "comite",
+        "descripcion": "Ajustes por nueva normativa",
+        "generado_por": "usuario"
+      }
+    ]
+  },
+  {
+    "nombre": "Reporte Incidentes Q1",
+    "etiqueta": "reporte",
+    "archivo": "reporte-incidentes-q1.pdf",
+    "historial": [
+      {
+        "version": 1,
+        "origen": "sistema",
+        "descripcion": "Reporte inicial",
+        "generado_por": "sistema"
+      }
+    ]
+  }
+]
