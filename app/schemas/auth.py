@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+
+from pydantic import BaseModel, Field
 
 from app.models.user import UserRole
+from app.schemas.types import EmailStr
 
 
 class UserBase(BaseModel):

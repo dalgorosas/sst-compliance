@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
@@ -62,6 +62,19 @@ frontend_dir = Path(__file__).parent / "frontend"
 # Servir PDFs estáticos (lectura)
 app.mount("/files", StaticFiles(directory=storage_path), name="files")
 app.mount("/viewer-assets", StaticFiles(directory=frontend_dir), name="viewer-assets")
+
+
+@app.get("/", include_in_schema=False)
+def index() -> RedirectResponse:
+    """Redirige al visor estático principal.
+
+    Cuando la aplicación se sirve en local suele visitarse ``/`` desde el
+    navegador, lo que anteriormente devolvía 404.  Para mantener los recursos
+    relativos del visor funcionando (CSS, JS, worker de PDF.js) redirigimos a la
+    versión estática ubicada en ``/viewer-assets``.
+    """
+
+    return RedirectResponse(url="/viewer-assets/viewer/index.html")
 
 
 @app.get("/health")
