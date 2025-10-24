@@ -1,0 +1,22 @@
+# Configuración de ejemplo para despliegues de SST Compliance.
+# Copie este archivo como `settings.yaml` y ajuste los valores según su entorno.
+
+app:
+  name: "SST Compliance API"
+  version: "0.1.0"
+  host: "0.0.0.0"
+  port: 8000
+
+security:
+  secret_key: "change-me"
+  access_token_expires_minutes: 60
+
+database:
+  url: "sqlite:///./data/app.db"
+
+storage:
+  pdf_dir: "./storage/pdfs"
+
+mail:
+  sender: "noreply@sst-compliance.local"
+  enabled: false

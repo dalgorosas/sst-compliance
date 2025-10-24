@@ -1,0 +1,11 @@
+# Catálogo resumido de requisitos para el Decreto 255.
+requisitos:
+  - codigo: D255-01
+    descripcion: "Disponer de un plan anual de SST aprobado por la gerencia."
+    periodicidad: anual
+  - codigo: D255-02
+    descripcion: "Registrar las capacitaciones obligatorias de los trabajadores."
+    periodicidad: trimestral
+  - codigo: D255-03
+    descripcion: "Mantener bitácoras de inspecciones de seguridad actualizadas."
+    periodicidad: mensual

@@ -1,29 +1,31 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.staticfiles import StaticFiles
+from __future__ import annotations
+
+import os
+
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
+from app import create_app
 from app.core.config import settings
 from app.db.session import Base, engine, get_db
-from app.repositories.documento_repo import DocumentoRepo
 from app.models.documento import Documento
+from app.repositories.documento_repo import DocumentoRepo
 
 # Inicializar almacenamiento y BD
 settings.ensure_dirs()
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+app: FastAPI = create_app()
 
-# Servir PDFs estáticos (lectura)
-app.mount("/files", StaticFiles(directory=settings.PDF_STORAGE_DIR), name="files")
 
 @app.get("/health")
 def health():
     return {"status": "ok", "env": settings.ENV, "version": settings.APP_VERSION}
 
-# ----------- Endpoints PDF -----------
 
-@app.get("/api/v1/pdf", response_model=None)
+@app.get("/api/v1/pdf", response_model=list[dict])
 def listar_pdfs(etiqueta: str | None = None, db: Session = Depends(get_db)):
     repo = DocumentoRepo()
     data = repo.listar(db, etiqueta=etiqueta)
@@ -39,12 +41,14 @@ def listar_pdfs(etiqueta: str | None = None, db: Session = Depends(get_db)):
         for d in data
     ]
 
+
 @app.get("/api/v1/pdf/{doc_id}", response_class=FileResponse)
 def descargar_pdf(doc_id: int, db: Session = Depends(get_db)):
     doc: Documento | None = db.get(Documento, doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado")
     return FileResponse(doc.ruta_relativa, media_type=doc.mimetype, filename=f"{doc.nombre}.pdf")
+
 
 @app.get("/api/v1/pdf/{doc_id}/historial")
 def historial_pdf(doc_id: int, db: Session = Depends(get_db)):
@@ -63,7 +67,7 @@ def historial_pdf(doc_id: int, db: Session = Depends(get_db)):
         for h in hist
     ]
 
-# Visualizador HTML simple (embebido)
+
 @app.get("/viewer/{doc_id}", response_class=HTMLResponse)
 def viewer(doc_id: int, db: Session = Depends(get_db)):
     doc: Documento | None = db.get(Documento, doc_id)
@@ -87,20 +91,18 @@ def viewer(doc_id: int, db: Session = Depends(get_db)):
           <header>
             <strong>{doc.nombre}</strong> — etiqueta: {doc.etiqueta} — actualizado: {doc.actualizado_en}
           </header>
-          <iframe src="/files/{doc.ruta_relativa.split('/')[-1]}#zoom=page-width"></iframe>
+          <iframe src="/files/{os.path.basename(doc.ruta_relativa)}#zoom=page-width"></iframe>
         </div>
       </body>
     </html>
     """
     return HTMLResponse(content=html, status_code=200)
 
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
 
-# Servir el frontend (PDF.js)
+
 frontend_dir = os.path.join(os.path.dirname(__file__), "frontend")
 app.mount("/viewer", StaticFiles(directory=frontend_dir), name="frontend")
+
 
 @app.get("/view/{pdf_id}")
 def view_pdf(pdf_id: int):
