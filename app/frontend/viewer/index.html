@@ -1,33 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Visor de PDF - SST Compliance</title>
+  <meta charset="utf-8" />
+  <title>SST Compliance · Visor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="viewer.css" />
   <script src="pdfjs/pdf.js"></script>
-  <script src="viewer.js" defer></script>
+  <script defer src="viewer.js"></script>
 </head>
 <body>
-  <header>
-    <h1>📄 SST Compliance - Visor de Documento</h1>
-  </header>
-
-  <section id="viewer-container">
-    <div id="pdf-viewer">
-      <canvas id="pdf-render"></canvas>
+  <aside class="sidebar">
+    <div class="brand">
+      <!-- Deja este slot para el logo (puedes poner img luego) -->
+      <div class="logo-slot">LOGO</div>
+      <div class="brand-meta">
+        <strong>SST Compliance</strong>
+        <small>Panel & Visor</small>
+      </div>
     </div>
 
-    <aside id="pdf-info">
-      <h2>Historial del Documento</h2>
-      <ul id="historial"></ul>
-    </aside>
-  </section>
+    <nav class="menu">
+      <span class="group">Navegación</span>
+      <a class="item active" href="#" onclick="return false;">Visor</a>
+      <a class="item" href="/docs" target="_blank">API Docs</a>
+      <a class="item" href="/" target="_blank">Dashboard</a>
+    </nav>
 
-  <footer>
-    <button id="prev-page">⬅️ Anterior</button>
-    <button id="next-page">➡️ Siguiente</button>
-    <span>Página: <span id="page-num"></span> / <span id="page-count"></span></span>
-    <button id="download-pdf">⬇️ Descargar</button>
-  </footer>
+    <div class="tags">
+      <span class="group">Etiquetas</span>
+      <div class="chips" id="chips-etiquetas">
+        <!-- chips dinámicos si quieres; por ahora estáticos -->
+        <span class="chip chip-brown">Legal</span>
+        <span class="chip chip-accent">SUT</span>
+        <span class="chip">ISO</span>
+      </div>
+    </div>
+
+    <div class="project">
+      <span class="group">Estado</span>
+      <div class="bar"><span style="width:56%"></span></div>
+      <small class="muted">56% completado</small>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="title">
+        <h1 id="doc-title">Documento</h1>
+        <span id="doc-meta" class="muted"></span>
+      </div>
+      <div class="actions">
+        <a id="btn-descargar" class="btn" href="#" target="_blank">Descargar</a>
+      </div>
+    </header>
+
+    <section class="kpis">
+      <div class="card kpi">
+        <div class="kpi-label">Versión</div>
+        <div class="kpi-value" id="kpi-version">-</div>
+        <small class="muted">última registrada</small>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">Tamaño</div>
+        <div class="kpi-value" id="kpi-size">-</div>
+        <small class="muted">bytes</small>
+      </div>
+      <div class="card kpi">
+        <div class="kpi-label">SHA-256</div>
+        <div class="kpi-value mono" id="kpi-hash">-</div>
+        <small class="muted">integridad</small>
+      </div>
+      <div class="card kpi accent">
+        <div class="kpi-label">Etiqueta</div>
+        <div class="kpi-value" id="kpi-tag">-</div>
+        <small class="muted">categoría</small>
+      </div>
+    </section>
+
+    <section class="layout">
+      <div class="viewer-card">
+        <iframe id="pdf-frame" title="PDF" src="" loading="lazy"></iframe>
+      </div>
+
+      <div class="side-card">
+        <div class="card-title">Historial</div>
+        <ul id="historial" class="timeline"></ul>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <small class="muted">© DALGORO · Interfaz oscura con tu paleta</small>
+    </footer>
+  </div>
 </body>
 </html>

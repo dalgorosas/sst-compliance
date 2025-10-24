@@ -1,113 +1,64 @@
-const urlParams = new URLSearchParams(window.location.search);
-const pathSegments = window.location.pathname.split('/').filter(Boolean);
-let requestedId = urlParams.get('id');
-
-if (!requestedId && pathSegments.length) {
-  const candidate = pathSegments[pathSegments.length - 1];
-  if (!Number.isNaN(Number.parseInt(candidate, 10))) {
-    requestedId = candidate;
-  }
-}
-
-const pdfId = Number.parseInt(requestedId ?? '', 10) || 1;
+// Parámetros: ?id=123  o  /viewer/<id> si lo sirves con routing aparte
+const url = new URL(window.location.href);
+const docId = url.searchParams.get("id") || (function(){
+  // fallback si vives en /viewer/1
+  const parts = location.pathname.split("/").filter(Boolean);
+  const last = parts[parts.length-1];
+  return /^\d+$/.test(last) ? last : 1;
+})();
 
 const pdfjsLib = window['pdfjs-dist/build/pdf'];
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs/pdf.worker.js';
-
-let pdfDoc = null;
-let pageNum = 1;
-let pageRendering = false;
-const canvas = document.getElementById('pdf-render');
-const ctx = canvas.getContext('2d');
-
-function showError(message) {
-  const container = document.getElementById('viewer-container');
-  if (container) {
-    container.innerHTML = `<p class="viewer-error">${message}</p>`;
-  }
+if (pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs/pdf.worker.js';
 }
 
-async function renderPage(num) {
-  if (!pdfDoc) {
+async function getJSON(u){ const r = await fetch(u); if(!r.ok) throw new Error(r.status); return r.json(); }
+const fmt = (d)=> new Date(d).toLocaleString();
+const bytes = (n)=> {
+  const x = Number(n||0);
+  if (x<1024) return x+" B";
+  if (x<1024**2) return (x/1024).toFixed(1)+" KB";
+  if (x<1024**3) return (x/1024**2).toFixed(1)+" MB";
+  return (x/1024**3).toFixed(1)+" GB";
+};
+
+async function load() {
+  // 1) listar documentos para ubicar nuestro doc y métricas
+  // si ya tienes endpoint GET /api/v1/pdf/{id} que descarga, usamos /api/v1/pdf para metadata
+  const list = await getJSON(`/api/v1/pdf`);
+  const doc = list.find(d=> String(d.id)===String(docId));
+  if (!doc) {
+    document.getElementById("doc-title").textContent = "Documento no encontrado";
     return;
   }
 
-  pageRendering = true;
-  const page = await pdfDoc.getPage(num);
-  const viewport = page.getViewport({ scale: 1.5 });
-  canvas.height = viewport.height;
-  canvas.width = viewport.width;
-  await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-  document.getElementById('page-num').textContent = num;
-  pageRendering = false;
+  // 2) título y meta
+  document.getElementById("doc-title").textContent = doc.nombre;
+  document.getElementById("doc-meta").textContent = `Etiqueta: ${doc.etiqueta || "-"} • Actualizado: ${fmt(doc.actualizado_en)}`;
+  document.getElementById("kpi-tag").textContent = doc.etiqueta || "-";
+  document.getElementById("kpi-size").textContent = bytes(doc.tamano_bytes || 0);
+
+  // 3) historial
+  const hist = await getJSON(`/api/v1/pdf/${doc.id}/historial`);
+  const ul = document.getElementById("historial");
+  ul.innerHTML = "";
+  let latestVersion = 1, latestHash = "-";
+  hist.forEach(h=>{
+    latestVersion = Math.max(latestVersion, h.version||1);
+    latestHash = h.hash_sha256 || latestHash;
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>v${h.version}</strong> — ${h.generado_por || "-"}<br>
+                    <small>${fmt(h.creado_en)} • ${h.descripcion || ""}</small>`;
+    ul.appendChild(li);
+  });
+  document.getElementById("kpi-version").textContent = latestVersion;
+  document.getElementById("kpi-hash").textContent = latestHash;
+
+  // 4) visor PDF (usamos el último archivo que apunta doc.ruta_relativa)
+  const filename = (doc.ruta_relativa || "").split(/[\\/]/).pop();
+  const frame = document.getElementById("pdf-frame");
+  frame.src = `/files/${filename}#zoom=page-width`;
+  document.getElementById("btn-descargar").href = `/api/v1/pdf/${doc.id}`;
 }
 
-async function loadPDF() {
-  try {
-    const response = await fetch(`/api/v1/pdf/${pdfId}`);
-    if (!response.ok) {
-      throw new Error('metadata-response');
-    }
-
-    const data = await response.json();
-    const archivo = data.archivo || data.ruta_relativa;
-    if (!archivo) {
-      throw new Error('missing-file-reference');
-    }
-
-    const pdfUrl = `/files/${encodeURIComponent(archivo)}`;
-    const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-    pdfDoc = pdf;
-    document.getElementById('page-count').textContent = pdfDoc.numPages;
-    document.getElementById('download-pdf').dataset.href = `/api/v1/pdf/${pdfId}/download`;
-    await renderPage(pageNum);
-    await loadHistorial();
-  } catch (error) {
-    console.error('Error cargando el PDF', error);
-    showError('No se pudo cargar el documento solicitado.');
-  }
-}
-
-function nextPage() {
-  if (!pdfDoc || pageNum >= pdfDoc.numPages) return;
-  pageNum++;
-  renderPage(pageNum);
-}
-
-function prevPage() {
-  if (!pdfDoc || pageNum <= 1) return;
-  pageNum--;
-  renderPage(pageNum);
-}
-
-async function loadHistorial() {
-  try {
-    const res = await fetch(`/api/v1/pdf/${pdfId}/historial`);
-    if (!res.ok) {
-      throw new Error('historial-response');
-    }
-    const historial = await res.json();
-    const ul = document.getElementById('historial');
-    if (!ul) return;
-
-    ul.innerHTML = '';
-    historial.forEach((item) => {
-      const li = document.createElement('li');
-      const fecha = item.fecha || item.creado_en || '';
-      const generadoPor = item.generado_por || '';
-      li.innerHTML = `<strong>${fecha}</strong><br>${generadoPor}`;
-      ul.appendChild(li);
-    });
-  } catch (error) {
-    console.error('Error cargando el historial', error);
-  }
-}
-
-document.getElementById('next-page').addEventListener('click', nextPage);
-document.getElementById('prev-page').addEventListener('click', prevPage);
-document.getElementById('download-pdf').addEventListener('click', () => {
-  const link = document.getElementById('download-pdf').dataset.href || `/api/v1/pdf/${pdfId}/download`;
-  window.open(link, '_blank');
-});
-
-loadPDF();
+load().catch(console.error);
