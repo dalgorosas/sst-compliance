@@ -7,12 +7,22 @@ const docId = url.searchParams.get("id") || (function(){
   return /^\d+$/.test(last) ? last : 1;
 })();
 
+const authToken = localStorage.getItem("sst.token");
+
 const pdfjsLib = window['pdfjs-dist/build/pdf'];
 if (pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs/pdf.worker.js';
 }
 
-async function getJSON(u){ const r = await fetch(u); if(!r.ok) throw new Error(r.status); return r.json(); }
+async function getJSON(u){
+  const headers = {};
+  if (authToken) {
+    headers["Authorization"] = `Bearer ${authToken}`;
+  }
+  const r = await fetch(u, { headers });
+  if(!r.ok) throw new Error(r.status);
+  return r.json();
+}
 const fmt = (d)=> new Date(d).toLocaleString();
 const bytes = (n)=> {
   const x = Number(n||0);
@@ -58,7 +68,33 @@ async function load() {
   const filename = (doc.ruta_relativa || "").split(/[\\/]/).pop();
   const frame = document.getElementById("pdf-frame");
   frame.src = `/files/${filename}#zoom=page-width`;
-  document.getElementById("btn-descargar").href = `/api/v1/pdf/${doc.id}`;
+  const download = document.getElementById("btn-descargar");
+  download.href = `/api/v1/pdf/${doc.id}/download`;
+  if (authToken) {
+    download.addEventListener("click", async (event) => {
+      event.preventDefault();
+      try {
+        const response = await fetch(`/api/v1/pdf/${doc.id}/download`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const tmp = document.createElement("a");
+        tmp.href = objectUrl;
+        tmp.download = `${doc.nombre || "documento"}.pdf`;
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (error) {
+        console.error(error);
+        alert("No se pudo descargar el archivo");
+      }
+    });
+  }
 }
 
 load().catch(console.error);

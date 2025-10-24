@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>SST Compliance · Acceso</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/auth-assets/styles.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <section class="hero">
+        <h1>SST Compliance</h1>
+        <p>Accede al panel de control para gestionar la documentación.</p>
+      </section>
+      <section class="forms">
+        <div class="card">
+          <h2>Iniciar sesión</h2>
+          <form id="login-form">
+            <label>
+              Correo electrónico
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <label>
+              Contraseña
+              <input type="password" name="password" autocomplete="current-password" required />
+            </label>
+            <button type="submit">Ingresar</button>
+          </form>
+          <p class="hint">¿Olvidaste tu contraseña? Contacta al administrador.</p>
+        </div>
+        <div class="card">
+          <h2>Crear cuenta</h2>
+          <form id="register-form">
+            <label>
+              Nombre completo
+              <input type="text" name="full_name" autocomplete="name" minlength="3" required />
+            </label>
+            <label>
+              Correo electrónico
+              <input type="email" name="email" autocomplete="email" required />
+            </label>
+            <label>
+              Contraseña
+              <input type="password" name="password" autocomplete="new-password" minlength="8" required />
+            </label>
+            <label>
+              Rol
+              <select name="role" required>
+                <option value="admin">Administrador</option>
+                <option value="tecnico">Técnico</option>
+                <option value="empresa" selected>Empresa</option>
+                <option value="medico">Médico ocupacional</option>
+                <option value="auditor">Auditor</option>
+              </select>
+            </label>
+            <button type="submit">Registrar</button>
+          </form>
+          <p class="hint">Los registros exitosos se sincronizan automáticamente con Google Sheets.</p>
+        </div>
+      </section>
+      <section class="messages" id="messages" role="status" aria-live="polite"></section>
+    </main>
+    <script src="/auth-assets/main.js" defer></script>
+  </body>
+</html>

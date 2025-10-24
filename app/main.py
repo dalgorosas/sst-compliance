@@ -58,10 +58,22 @@ app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
 
 storage_path = _get_storage_path()
 frontend_dir = Path(__file__).parent / "frontend"
+auth_dir = frontend_dir / "auth"
 
 # Servir PDFs estáticos (lectura)
 app.mount("/files", StaticFiles(directory=storage_path), name="files")
 app.mount("/viewer-assets", StaticFiles(directory=frontend_dir), name="viewer-assets")
+app.mount("/auth-assets", StaticFiles(directory=auth_dir), name="auth-assets")
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    """Entrega la pantalla de acceso con formularios de login y registro."""
+
+    entrypoint = auth_dir / "index.html"
+    if not entrypoint.exists():
+        raise HTTPException(status_code=500, detail="No se encontró la interfaz de acceso")
+    return FileResponse(entrypoint)
 
 
 @app.get("/", include_in_schema=False)
