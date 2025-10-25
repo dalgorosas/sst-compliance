@@ -1,15 +1,11 @@
+# app/main.py
 from pathlib import Path
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from sqlalchemy.orm import Session
+from fastapi import FastAPI
 
 from app.core.config import settings
-from app.db.session import Base, engine, get_db
 from app.models.documento import Documento
-from app.repositories.documento_repo import DocumentoRepo
 
 
 def _get_storage_path() -> Path:
@@ -50,12 +46,27 @@ def _document_payload(documento: Documento) -> dict[str, Any]:
         "actualizado_en": documento.actualizado_en,
     }
 
-# Quitar create_all (Alembic hará las migraciones)
-settings.ensure_dirs()
 
-app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+def create_app() -> FastAPI:
+    # Mueve efectos de inicio aquí para evitar que se ejecuten al importar el módulo
+    settings.ensure_dirs()
 
-# Dejar UN solo handler para "/": redirigir al visor
-@app.get("/", include_in_schema=False)
-def index() -> RedirectResponse:
-    return RedirectResponse(url="/viewer-assets/viewer/index.html")
+    app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+
+    @app.get("/", include_in_schema=False)
+    def root():
+        return {"app": settings.APP_NAME, "status": "ok"}
+
+    @app.get("/health", include_in_schema=False)
+    def health():
+        return {"status": "ok"}
+
+    # (Incluye aquí tus routers reales)
+    # from app.api.v1 import ...
+    # app.include_router(...)
+
+    return app
+
+
+# Instancia para Uvicorn
+app = create_app()
