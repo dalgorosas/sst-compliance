@@ -1,36 +1,51 @@
+# app/core/config.py
 from __future__ import annotations
-
 from pathlib import Path
-from pydantic import Field
+from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 
 class Settings(BaseSettings):
-    """Configuración central de la aplicación."""
+    # --- App ---
+    APP_NAME: str = "SST Compliance - DALGORO"
+    APP_VERSION: str = "0.1.0"
 
-    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True)
+    # --- Entorno ---
+    ENV: str = "dev"
 
-    ENV: str = Field(default="dev")
-    APP_NAME: str = Field(default="SST Compliance API")
-    APP_VERSION: str = Field(default="0.1.0")
-    APP_HOST: str = Field(default="127.0.0.1")
-    APP_PORT: int = Field(default=8000)
+    # --- DB ---
+    DATABASE_URL: str = "sqlite:///./data/dev.db"
 
-    DATABASE_URL: str = Field(default="sqlite:///./data/app.db")
-    PDF_STORAGE_DIR: str = Field(default="./storage/pdfs")
-    
-    SECRET_KEY: str = Field(default="change-me")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60)
+    # --- CORS ---
+    ALLOWED_ORIGINS: List[str] | str = ["http://127.0.0.1:8000", "http://localhost:8000"]
 
-    GOOGLE_SERVICE_ACCOUNT_FILE: str | None = Field(default=None)
-    GOOGLE_SERVICE_ACCOUNT_JSON: str | None = Field(default=None)
-    GOOGLE_SHEETS_USER_SPREADSHEET_ID: str | None = Field(default=None)
-    GOOGLE_SHEETS_USER_WORKSHEET: str | None = Field(default=None)
-    
+    # --- JWT (si aplica) ---
+    JWT_SECRET: str = "change-me"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
+    # --- Storage PDF ---
+    PDF_STORAGE_DIR: Path = Field(default=Path("pdfs"))
+
+    # --- Google Service Account (dos modos soportados por google_sheets.py) ---
+    GOOGLE_SERVICE_ACCOUNT_FILE: str | None = None
+    GOOGLE_SERVICE_ACCOUNT_JSON: str | None = None
+
+    # --- Google Sheets (compat con nombres previos y los que requiere google_sheets.py) ---
+    # Hoja de usuarios (la que usa GoogleSheetsRegistry)
+    GOOGLE_SHEETS_USER_SPREADSHEET_ID: str | None = None
+    GOOGLE_SHEETS_USER_WORKSHEET: str | None = None
+
+    # Hoja de citas / docs (si otra parte la usa con estos nombres antiguos)
+    GOOGLE_APPLICATION_CREDENTIALS: str | None = None
+    GOOGLE_SHEETS_DOC_KEY: str | None = None
+    GOOGLE_SHEETS_TAB: str = "Citas"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    # Utilidad para crear carpetas necesarias (llamada en main.py)
     def ensure_dirs(self) -> None:
-        """Crea los directorios necesarios para ejecutar la aplicación."""
-        
+        Path("data").mkdir(parents=True, exist_ok=True)
         Path(self.PDF_STORAGE_DIR).mkdir(parents=True, exist_ok=True)
-        Path("./data").mkdir(parents=True, exist_ok=True)
-
 
 settings = Settings()
